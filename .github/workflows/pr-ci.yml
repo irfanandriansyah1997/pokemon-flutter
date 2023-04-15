@@ -11,11 +11,6 @@ on:
       - ready_for_review
       - synchronize
 
-concurrency:
-  group: pr-check-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
-
-
 jobs:
   linter:
     name: Check Linter
