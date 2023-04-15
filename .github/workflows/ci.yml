@@ -1,0 +1,27 @@
+name: 🧪 Run CI before merge
+
+on:
+  workflow_call:
+
+jobs:
+  ci:
+    name: 🧪 Continuous Integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v3
+      - name: ⚙️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+      - name: ⚙️ Setup Melos
+        uses: bluefireteam/melos-action@v2
+      - name: ⚙️ Install dependencies for all packages
+        run: flutter pub get
+      - name: 🧪 Check linter and code quality
+        run: |
+          melos run quality:analyze:all
+          melos run quality:dcm-checks:all
+      - name: 🧪 Run unit tests
+        run: melos run quality:analyze:all

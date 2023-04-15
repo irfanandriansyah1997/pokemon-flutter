@@ -1,0 +1,83 @@
+name: pokemon_apps
+
+packages:
+  - pokemon
+
+scripts:
+  ###############################################
+  ##              BUILD COMMANDS               ##
+  ###############################################
+  build:pub_get:all:
+    run: flutter pub get
+    exec:
+      concurrency: 6
+    description: Install all dependencies
+
+  build:clean:
+    run: |
+      flutter clean && \
+      flutter pub get
+    exec:
+      concurrency: 6
+    description: Clean Flutter package and install dependencies
+
+  build:clean:all:
+    run: melos run --no-select build:clean
+    description: Clean Flutter package and install dependencies for all packages
+
+  ###############################################
+  ##             QUALITY COMMANDS              ##
+  ###############################################
+  quality:analyze:
+    exec: |
+      flutter analyze --no-fatal-infos --no-fatal-warnings && \
+      flutter pub run dart_code_metrics:metrics analyze --no-fatal-warnings . && \
+      flutter format .
+    select-package:
+      dir-exists:
+        - lib
+    description: |
+      Run Flutter static analysis checks and format
+      Note: you can also rely on your IDEs Dart Analysis / Issues window.
+
+  quality:analyze:all:
+    run: melos run --no-select quality:analyze
+    description: |
+      Run Flutter static analysis checks and format all packages
+      Note: you can also rely on your IDEs Dart Analysis / Issues window.
+
+  quality:dcm-checks:
+    exec: |
+      flutter pub run dart_code_metrics:metrics check-unnecessary-nullable --no-fatal-found . && \
+      flutter pub run dart_code_metrics:metrics check-unused-code --no-fatal-unused --exclude "{**.g.dart,**.gen.dart,**.freezed.dart,.dart_tool/**}" . && \
+      flutter pub run dart_code_metrics:metrics check-unused-files --no-fatal-unused --exclude ".dart_tool/**.dart" . && \
+      flutter pub run dart_code_metrics:metrics check-unused-l10n --no-fatal-unused .
+    select-package:
+      dir-exists:
+        - lib
+    description: Run Dart Code Metrics (DCM) extended checks
+
+  quality:dcm-checks:all:
+    run: melos run --no-select quality:dcm-checks
+    description: Run Dart Code Metrics (DCM) extended checks on all packages
+
+  run:dev-app:
+    exec: flutter run -t 'MELOS_ROOT_PATH/pokemon/lib/main.dart' --flavor dev
+    select-package:
+      scope: "pokemon"
+
+  ###############################################
+  ##              TEST COMMANDS                ##
+  ###############################################
+  test:
+    run: flutter test --no-pub --reporter compact
+    exec:
+      concurrency: 6
+    select-package:
+      dir-exists:
+        - test
+    description: Run `flutter test` for a specific package.
+
+  test:all:
+    run: melos run test --no-select
+    description: Run all Flutter tests in this project.
