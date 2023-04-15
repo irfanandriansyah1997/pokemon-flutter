@@ -1,0 +1,51 @@
+name: CI before merge
+
+on:
+  pull_request:
+    branches: [main]
+    types:
+      - opened
+      - reopened
+      - labeled
+      - review_requested
+      - ready_for_review
+      - synchronize
+
+jobs:
+  linter:
+    name: Check Linter
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v3
+      - name: ⚙️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+      - name: ⚙️ Setup Melos
+        run: dart pub global activate melos 2.9.0
+      - name: ⚙️ Install dependencies for all packages
+        run: melos run build:pub_get:all
+      - name: 🧪 Check linter and code quality
+        run: |
+          melos run quality:analyze:all
+          melos run quality:dcm-checks:all
+
+  test:
+    name: Running Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v3
+      - name: ⚙️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+      - name: ⚙️ Setup Melos
+        run: dart pub global activate melos 2.9.0
+      - name: ⚙️ Install dependencies for all packages
+        run: melos run build:pub_get:all
+      - name: 🧪 Run unit tests
+        run: melos run test:all
