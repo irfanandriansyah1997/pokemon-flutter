@@ -4,8 +4,8 @@ on:
   pull_request:
 
 jobs:
-  ci:
-    name: 🧪 Continuous Integration
+  linter:
+    name: Check Linter
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout repository
@@ -23,5 +23,29 @@ jobs:
         run: |
           melos run quality:analyze:all
           melos run quality:dcm-checks:all
+
+  test:
+    name: Running Unit Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repository
+        uses: actions/checkout@v3
+      - name: ⚙️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+          cache: true
+      - name: ⚙️ Setup Melos
+        run: dart pub global activate melos 2.9.0
+      - name: ⚙️ Install dependencies for all packages
+        run: melos run build:pub_get:all
       - name: 🧪 Run unit tests
-        run: melos run quality:analyze:all
+        run: melos run test:all
+
+  title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+    steps:
+      - uses: amannn/action-semantic-pull-request@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
