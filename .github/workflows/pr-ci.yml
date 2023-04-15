@@ -1,4 +1,4 @@
-name: 🧪 Run CI before merge
+name: CI before merge
 
 on:
   pull_request:
@@ -54,11 +54,3 @@ jobs:
         run: melos run build:pub_get:all
       - name: 🧪 Run unit tests
         run: melos run test:all
-
-  title:
-    name: Validate PR title
-    runs-on: ubuntu-latest
-    steps:
-      - uses: amannn/action-semantic-pull-request@v5
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
